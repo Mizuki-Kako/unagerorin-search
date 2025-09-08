@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>うなげろりん検索</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+            background: #f7f8fa;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            z-index: 100;
+            padding: 32px 0 16px 0;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            color: #333;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+        .search-container {
+            position: fixed;
+            top: 88px;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            z-index: 99;
+        }
+        form {
+            display: flex;
+            gap: 12px;
+            background: #fff;
+            padding: 18px 24px;
+            border-radius: 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        input[type="text"] {
+            width: 320px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 24px;
+            background: #f0f1f5;
+            font-size: 1rem;
+            outline: none;
+            color: #333;
+            transition: box-shadow 0.2s;
+        }
+        input[type="text"]:focus {
+            box-shadow: 0 0 0 2px #a0c4ff;
+            background: #fff;
+        }
+        input[type="text"]::placeholder {
+            color: #b0b0b0;
+            opacity: 1;
+        }
+        select {
+            border: none;
+            border-radius: 16px;
+            padding: 10px 16px;
+            background: #f0f1f5;
+            font-size: 1rem;
+            color: #333;
+            outline: none;
+        }
+        button[type="submit"] {
+            background: linear-gradient(90deg, #4f8cff 0%, #38b6ff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 10px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(80,150,255,0.08);
+        }
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, #38b6ff 0%, #4f8cff 100%);
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 32px 0;
+        }
+        .results-scroll {
+            margin-top: 180px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        /*ul {
+            list-style: none;
+            padding: 0;
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            max-height: 60vh;
+            overflow-y: auto;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        li {
+            background: #fff;
+            margin-bottom: 24px;
+            padding: 20px 28px;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+            align-self: center;
+        }*/
+        ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 auto;  /* 中央寄せ */
+        width: 100%;
+        max-width: 700px; /* 中央の箱サイズを固定 */
+        box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        background: transparent;
+        }
+
+        li {
+            background: #fff;
+            margin-bottom: 24px;
+            padding: 20px 28px;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            width: 100%;      /* ✅ ulに揃える */
+            box-sizing: border-box;
+        }  /* ✅ align-self削除 */
+        }
+        a {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        small {
+            color: #888;
+        }
+        p {
+            color: #444;
+            margin-top: 8px;
+        }
+        @media (max-width: 600px) {
+            header {
+                padding: 18px 0 8px 0;
+            }
+            .search-container {
+                top: 62px;
+            }
+            .results-scroll {
+                margin-top: 120px;
+            }
+            .search-container form {
+                flex-direction: column;
+                gap: 10px;
+                padding: 14px 8px;
+            }
+            input[type="text"] {
+                width: 100%;
+            }
+            ul {
+                max-width: 98vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>うなげろりんサーチ</h1>
+    </header>
+    <div class="search-container">
+        <form method="POST">
+            <input type="text" name="keyword" placeholder="キーワードを入力" value="{{ keyword }}">
+            <select name="order" onchange="this.form.submit()">
+                <option value="relevance" {% if order=="relevance" %}selected{% endif %}>関連度順</option>
+                <option value="newest" {% if order=="newest" %}selected{% endif %}>新しい順</option>
+                <option value="oldest" {% if order=="oldest" %}selected{% endif %}>古い順</option>
+            </select>
+            <button type="submit">検索</button>
+        </form>
+    </div>
+    <div class="results-scroll">
+    <hr style="width:700px;max-width:98vw;">
+    {% if results %}
+        <ul>
+        {% for title, published, link, description, score in results %}
+            <li>
+                <a href="{{ link }}" target="_blank">{{ title }}</a><br>
+                <small>{{ published }}</small><br>
+                <p>{{ description }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        {% if keyword %}
+            <p>検索結果はありません。</p>
+        {% endif %}
+    {% endif %}
+    </div>
+</body>
+</html>
