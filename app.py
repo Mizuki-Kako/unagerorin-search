@@ -9,6 +9,8 @@ def search_db(keyword, order):
     cur = conn.cursor()
 
     if order == "relevance":
+        # LIKE検索に近づけるため、title:keyword* OR description:keyword* で部分一致
+        match_query = f'title:{keyword}* OR description:{keyword}*'
         query = """
             SELECT e.title, e.description, e.pub_date, e.link, bm25(episodes_fts) as score
             FROM episodes_fts
@@ -16,7 +18,7 @@ def search_db(keyword, order):
             WHERE episodes_fts MATCH ?
             ORDER BY score ASC
         """
-        params = (keyword,)
+        params = (match_query,)
     else:
         # 並び順
         order_by = "DESC" if order == "newest" else "ASC"
